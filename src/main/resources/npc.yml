@@ -1,0 +1,8 @@
+npc:
+  first_npc:
+    name: "Начальник NPC"
+    location:
+      world: "first_spawn"
+      x: -0.500
+      y: 152
+      z: 20.500

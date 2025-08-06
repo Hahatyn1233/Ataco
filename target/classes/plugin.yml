@@ -1,0 +1,9 @@
+name: Ataco
+version: '0.1'
+main: org.hahatyn.ataco.Ataco
+api-version: '1.21'
+authors: [ Hahatyn ]
+commands:
+  gomap:
+    description: Телепортация в другой мир
+    usage: /gomap <название>
