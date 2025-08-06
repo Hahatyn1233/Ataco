@@ -14,13 +14,13 @@ import org.hahatyn.ataco.rpg.attribute.AttributeType;
 
 import java.util.*;
 
-public class ItemAutoUpdater {
+public class CustomItemsUpdater {
 
     private final JavaPlugin plugin;
     private final Map<String, ItemTemplate> templates = new HashMap<>();
     private final Random random = new Random();
 
-    public ItemAutoUpdater(JavaPlugin plugin) {
+    public CustomItemsUpdater(JavaPlugin plugin) {
         this.plugin = plugin;
         loadTemplates();
         startTask();

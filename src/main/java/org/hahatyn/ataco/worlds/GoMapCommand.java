@@ -5,7 +5,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.hahatyn.ataco.worlds.WorldManager;
 
 public class GoMapCommand implements CommandExecutor {
 
@@ -18,7 +17,6 @@ public class GoMapCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cТолько игрок может использовать эту команду.");
             return true;
         }
 
@@ -27,8 +25,7 @@ public class GoMapCommand implements CommandExecutor {
             return true;
         }
 
-        String worldName = args[0];
-        worldManager.teleportToWorld(player, worldName);
+        worldManager.teleportToWorld(player, args[0]);
         return true;
     }
 }

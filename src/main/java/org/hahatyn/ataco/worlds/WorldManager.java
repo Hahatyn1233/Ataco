@@ -12,7 +12,6 @@ import java.util.Map;
 public class WorldManager {
 
     private final Map<String, World> loadedWorlds = new HashMap<>();
-    private final String DEFAULT_WORLD_FOLDER = "maps"; // например, папка plugins/твой_плагин/maps/
 
     public World getOrLoadWorld(String name) {
         if (loadedWorlds.containsKey(name)) {

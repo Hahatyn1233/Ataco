@@ -9,7 +9,7 @@ import org.hahatyn.ataco.rpg.attribute.AttributeData;
 import org.hahatyn.ataco.rpg.attribute.AttributeEvent;
 import org.hahatyn.ataco.rpg.attribute.AttributeUpdateTask;
 import org.hahatyn.ataco.rpg.classes.ClassesData;
-import org.hahatyn.ataco.rpg.items.ItemAutoUpdater;
+import org.hahatyn.ataco.rpg.items.CustomItemsUpdater;
 import org.hahatyn.ataco.worlds.GoMapCommand;
 import org.hahatyn.ataco.worlds.WorldManager;
 
@@ -28,7 +28,7 @@ public final class Ataco extends JavaPlugin {
         saveDefaultConfig();
         instance = this;
 
-        new ItemAutoUpdater(this);
+        new CustomItemsUpdater(this);
         this.regionData = new RegionData();
         this.classesData = new ClassesData();
         //attributedata
