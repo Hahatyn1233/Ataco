@@ -9,7 +9,7 @@ public class ClassesData {
     private static final String DB_URL = "jdbc:sqlite:plugins/Ataco/classes.db";
 
     // Кэш по никам (необязательно, можно убрать)
-    private final Map<String, PlayerClassStats> cache = new HashMap<>();
+    private final Map<String, ClassesPlayerStats> cache = new HashMap<>();
 
     public ClassesData() {
         createTable();
@@ -81,7 +81,7 @@ public class ClassesData {
         }
     }
 
-    public PlayerClassStats getPlayerStats(String name) {
+    public ClassesPlayerStats getPlayerStats(String name) {
         if (cache.containsKey(name)) return cache.get(name);
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
@@ -90,7 +90,7 @@ public class ClassesData {
             stmt.setString(1, name);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    PlayerClassStats stats = new PlayerClassStats(
+                    ClassesPlayerStats stats = new ClassesPlayerStats(
                             name,
                             ClassesType.valueOf(rs.getString("class_type")),
                             rs.getInt("level"),
@@ -113,7 +113,7 @@ public class ClassesData {
         return null;
     }
 
-    public void savePlayerStats(PlayerClassStats stats) {
+    public void savePlayerStats(ClassesPlayerStats stats) {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement stmt = conn.prepareStatement("""
                 UPDATE classes SET

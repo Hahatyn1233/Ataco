@@ -13,9 +13,6 @@ import org.hahatyn.ataco.rpg.items.CustomItemsUpdater;
 import org.hahatyn.ataco.worlds.GoMapCommand;
 import org.hahatyn.ataco.worlds.WorldManager;
 
-import java.sql.SQLException;
-
-
 public final class Ataco extends JavaPlugin {
 
     private static Ataco instance;
@@ -31,21 +28,11 @@ public final class Ataco extends JavaPlugin {
         new CustomItemsUpdater(this);
         this.regionData = new RegionData();
         this.classesData = new ClassesData();
-        //attributedata
-        try {
-            attributeData = new AttributeData(getDataFolder() + "/attributes.db");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            getLogger().severe("Не удалось подключиться к базе данных SQLite!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        this.attributeData = new AttributeData();
         new AttributeUpdateTask(this, attributeData).start();
         Bukkit.getPluginManager().registerEvents(new RegionEvent(new RegionManager(regionData)), this);
         Bukkit.getPluginManager().registerEvents(new AttributeEvent(this, attributeData), this);
-
-        WorldManager worldManager = new WorldManager();
-        getCommand("gomap").setExecutor(new GoMapCommand(worldManager));
+        getCommand("gomap").setExecutor(new GoMapCommand(new WorldManager()));
     }
 
     @Override
@@ -61,6 +48,9 @@ public final class Ataco extends JavaPlugin {
     }
     public ClassesData getClassesData() {
         return classesData;
+    }
+    public AttributeData getAttributeData() {
+        return attributeData;
     }
 
 }

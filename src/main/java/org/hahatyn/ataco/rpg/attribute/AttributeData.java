@@ -11,11 +11,16 @@ import java.util.Map;
 
 public class AttributeData {
 
+    private static final String DB_URL = "jdbc:sqlite:plugins/Ataco/attributes.db";
     private final Connection connection;
 
-    public AttributeData(String dbFilePath) throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:" + dbFilePath);
-        createTableIfNotExists();
+    public AttributeData() {
+        try {
+            connection = DriverManager.getConnection(DB_URL);
+            createTableIfNotExists();
+        } catch (SQLException e) {
+            throw new RuntimeException("Не удалось подключиться к базе данных атрибутов!", e);
+        }
     }
 
     private void createTableIfNotExists() throws SQLException {
@@ -30,21 +35,15 @@ public class AttributeData {
         }
     }
 
-    /**
-     * Собирает атрибуты с экипировки игрока (рука + броня), суммирует их и сохраняет в БД.
-     */
     public void updatePlayerAttributes(Player player) {
         Map<AttributeType, Double> aggregatedAttributes = new EnumMap<>(AttributeType.class);
 
-        // Обработать руку
         processItem(player.getInventory().getItemInMainHand(), aggregatedAttributes);
 
-        // Обработать броню (голова, грудь, штаны, ботинки)
         for (ItemStack armorPiece : player.getInventory().getArmorContents()) {
             processItem(armorPiece, aggregatedAttributes);
         }
 
-        // Сохраняем в БД
         try {
             saveAttributes(player.getName(), aggregatedAttributes);
         } catch (SQLException e) {
@@ -66,8 +65,9 @@ public class AttributeData {
                 if (line.startsWith(prefix)) {
                     String[] parts = line.split(":");
                     if (parts.length < 2) continue;
-                    String valuePart = parts[1].replaceAll("§.", "").trim(); // убрать цвет
-                    valuePart = valuePart.replace("%", "").replace("+", "");
+                    String valuePart = parts[1].replaceAll("§.", "").trim()
+                            .replace("%", "")
+                            .replace("+", "");
 
                     try {
                         double value = Double.parseDouble(valuePart);
@@ -80,7 +80,6 @@ public class AttributeData {
     }
 
     private void saveAttributes(String playerName, Map<AttributeType, Double> attributes) throws SQLException {
-        // Формируем запрос с upsert (INSERT OR REPLACE)
         StringBuilder columns = new StringBuilder("player_name");
         StringBuilder placeholders = new StringBuilder("?");
         StringBuilder updates = new StringBuilder();
@@ -106,9 +105,6 @@ public class AttributeData {
         }
     }
 
-    /**
-     * Получить атрибуты игрока из БД
-     */
     public Map<AttributeType, Double> getAttributes(String playerName) throws SQLException {
         Map<AttributeType, Double> result = new EnumMap<>(AttributeType.class);
 
@@ -116,7 +112,7 @@ public class AttributeData {
         for (AttributeType type : AttributeType.values()) {
             sql.append(type.name()).append(", ");
         }
-        sql.setLength(sql.length() - 2); // убрать запятую и пробел
+        sql.setLength(sql.length() - 2);
         sql.append(" FROM player_attributes WHERE player_name = ?");
 
         try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
@@ -129,13 +125,8 @@ public class AttributeData {
                 }
             }
         }
-        return result;
-    }
 
-    public void close() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
-        }
+        return result;
     }
 
     public Map<AttributeType, Double> getAttributesOrEmpty(String playerName) {
@@ -144,6 +135,16 @@ public class AttributeData {
         } catch (SQLException e) {
             e.printStackTrace();
             return new EnumMap<>(AttributeType.class);
+        }
+    }
+
+    public void close() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

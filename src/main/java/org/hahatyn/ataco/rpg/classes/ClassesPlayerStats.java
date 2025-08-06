@@ -1,6 +1,6 @@
 package org.hahatyn.ataco.rpg.classes;
 
-public class PlayerClassStats {
+public class ClassesPlayerStats {
 
     private final String playerName;
     private ClassesType classType;
@@ -12,8 +12,8 @@ public class PlayerClassStats {
     private int intelligence;
     private int statPoints;
 
-    public PlayerClassStats(String playerName, ClassesType classType, int level, int experience, int maxExperience,
-                            int strength, int agility, int intelligence, int statPoints) {
+    public ClassesPlayerStats(String playerName, ClassesType classType, int level, int experience, int maxExperience,
+                              int strength, int agility, int intelligence, int statPoints) {
         this.playerName = playerName;
         this.classType = classType;
         this.level = level;
