@@ -8,9 +8,6 @@ public class ClassesData {
 
     private static final String DB_URL = "jdbc:sqlite:plugins/Ataco/classes.db";
 
-    // Кэш по никам (необязательно, можно убрать)
-    private final Map<String, ClassesPlayerStats> cache = new HashMap<>();
-
     public ClassesData() {
         createTable();
     }
@@ -82,7 +79,6 @@ public class ClassesData {
     }
 
     public ClassesPlayerStats getPlayerStats(String name) {
-        if (cache.containsKey(name)) return cache.get(name);
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM classes WHERE name = ?")) {
@@ -101,7 +97,6 @@ public class ClassesData {
                             rs.getInt("intelligence"),
                             rs.getInt("stat_points")
                     );
-                    cache.put(name, stats);
                     return stats;
                 }
             }

@@ -123,7 +123,7 @@ public class RegionEvent implements Listener {
     }
 
     /**
-     * Запретить наносить урон сущностям в чужом регионе
+     * Запретить наносить урон entity в чужом регионе
      */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {

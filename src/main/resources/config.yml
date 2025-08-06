@@ -3,13 +3,34 @@ items:
     name: "§7Сломанный деревянный меч"
     material: WOODEN_SWORD
     PHYSICAL_DAMAGE: 10
-    CRITICAL_CHANGE: 20 #в процентах
-    MOVESPEED: -5.0 #в процентах
-    change: 80 #шанс в процентах
+    CRITICAL_CHANGE: 20
+    MOVESPEED: -5.0
+    change: 80
   NORMAL_WOODEN_SWORD:
     name: "§fОбычный деревянный меч"
     material: WOODEN_SWORD
     PHYSICAL_DAMAGE: 10
-    CRITICAL_CHANGE: 20 #в процентах
-    MOVESPEED: -5.0 #в процентах
-    change: 60 #шанс в процентах
+    CRITICAL_CHANGE: 20
+    MOVESPEED: -5.0
+    change: 60
+  RARE_WOODEN_SWORD:
+    name: "§bРедкий деревянный меч"
+    material: WOODEN_SWORD
+    PHYSICAL_DAMAGE: 10
+    CRITICAL_CHANGE: 20
+    MOVESPEED: -5.0
+    change: 30
+  MYTHICAL_WOODEN_SWORD:
+    name: "§dМифический деревянный меч"
+    material: WOODEN_SWORD
+    PHYSICAL_DAMAGE: 10
+    CRITICAL_CHANGE: 20
+    MOVESPEED: -5.0
+    change: 5
+  LEGENDARY_WOODEN_SWORD:
+    name: "§eЛегендарный деревянный меч"
+    material: WOODEN_SWORD
+    PHYSICAL_DAMAGE: 10
+    CRITICAL_CHANGE: 20
+    MOVESPEED: -5.0
+    change: 1

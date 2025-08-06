@@ -1,6 +1,6 @@
 npc:
   first_npc:
-    name: "Начальник NPC"
+    name: "Первый NPC"
     location:
       world: "first_spawn"
       x: -0.500

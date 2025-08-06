@@ -21,7 +21,6 @@ public class DialogBuilder {
     private final List<DialogInput> inputs = new ArrayList<>();
     private final List<ActionButton> buttons = new ArrayList<>();
 
-    // Добавить строку текста (один или несколько BaseComponent)
     public DialogBuilder addLine(BaseComponent... components) {
         for (BaseComponent c : components) {
             lines.add(c);
@@ -29,7 +28,6 @@ public class DialogBuilder {
         return this;
     }
 
-    // Добавить строку текста из строки с цветом и стилями
     public DialogBuilder addLine(String text, net.md_5.bungee.api.ChatColor color) {
         TextComponent tc = new TextComponent(text);
         tc.setColor(color);
@@ -37,21 +35,18 @@ public class DialogBuilder {
         return this;
     }
 
-    // Добавить поле ввода
     public DialogBuilder addInput(String id, String label) {
         BaseComponent[] labelComp = new ComponentBuilder(label).create();
         inputs.add(new TextInput(id, labelComp.length > 0 ? labelComp[0] : new TextComponent(label)));
         return this;
     }
 
-    // Добавить кнопку с текстом и идентификатором действия
     public DialogBuilder addButton(String text, String actionId) {
         BaseComponent[] btnComp = new ComponentBuilder(text).create();
         buttons.add(new ActionButton(btnComp.length > 0 ? btnComp[0] : new TextComponent(text), new CustomClickAction(actionId)));
         return this;
     }
 
-    // Создать Dialog
     public Dialog build() {
         TextComponent combined = new TextComponent();
         for (BaseComponent line : lines) {
@@ -76,7 +71,6 @@ public class DialogBuilder {
         return dialog;
     }
 
-    // Показать диалог игроку
     public void show(Player player) {
         player.showDialog(build());
     }
