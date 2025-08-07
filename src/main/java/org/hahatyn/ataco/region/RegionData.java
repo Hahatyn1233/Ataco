@@ -1,129 +1,129 @@
 package org.hahatyn.ataco.region;
 
+import org.hahatyn.ataco.utils.Cuboid;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class RegionData {
+public class RegionData implements IRegion {
+    private final Map<Long, Set<Region>> buckets = new ConcurrentHashMap<>();
+    private final Map<String, Region> byId = new ConcurrentHashMap<>();
+    private final String dbUrl;
 
-    private static final String DB_URL = "jdbc:sqlite:plugins/Ataco/regions.db";
-    private final Map<String, Region> regionMap = new HashMap<>();
-
-    public RegionData() {
-        createTable();
-        loadRegions();
+    public RegionData(String dbUrl) {
+        this.dbUrl = dbUrl;
+        initDatabase();
+        loadAll();
     }
 
-    private void createTable() {
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement()) {
-
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS regions (
-                    id TEXT PRIMARY KEY,
-                    owner TEXT,
-                    type TEXT,
-                    members TEXT,
-                    world TEXT,
-                    x DOUBLE,
-                    y DOUBLE,
-                    z DOUBLE,
-                    health DOUBLE,
-                    max_health DOUBLE
-                );
-            """);
-
+    private void initDatabase() {
+        try (Connection c = DriverManager.getConnection(dbUrl);
+             Statement s = c.createStatement()) {
+            s.executeUpdate("CREATE TABLE IF NOT EXISTS regions ("
+                    + "id TEXT PRIMARY KEY, owner TEXT, type TEXT, members TEXT, world TEXT, x DOUBLE, y DOUBLE, z DOUBLE, health DOUBLE, max_health DOUBLE);");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void saveRegion(Region region) {
-        regionMap.put(region.getId(), region);
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement("""
-                INSERT OR REPLACE INTO regions (id, owner, type, members, world, x, y, z, health, max_health)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """)) {
-
-            stmt.setString(1, region.getId());
-            stmt.setString(2, region.getOwnerName());
-            stmt.setString(3, region.getRegionType().name());
-            stmt.setString(4, String.join(";", region.getMembers()));
-            stmt.setString(5, region.getCenterLocation().getWorld().getName());
-            stmt.setDouble(6, region.getCenterLocation().getX());
-            stmt.setDouble(7, region.getCenterLocation().getY());
-            stmt.setDouble(8, region.getCenterLocation().getZ());
-            stmt.setDouble(9, region.getHeath());
-            stmt.setDouble(10, region.getMaxHealth());
-
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    private long bucketKey(Location loc) {
+        int cx = loc.getBlockX() >> 4;
+        int cz = loc.getBlockZ() >> 4;
+        return (((long)cx) << 32) | (cz & 0xffffffffL);
     }
 
-    public void deleteRegion(String id) {
-        regionMap.remove(id);
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM regions WHERE id = ?")) {
-
-            stmt.setString(1, id);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void loadRegions() {
-        regionMap.clear();
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM regions")) {
-
-            while (rs.next()) {
-                String id = rs.getString("id");
-                String owner = rs.getString("owner");
-                RegionType type = RegionType.valueOf(rs.getString("type"));
-                List<String> members = Arrays.asList(rs.getString("members").split(";"));
-                Location location = new Location(
-                        Bukkit.getWorld(rs.getString("world")),
-                        rs.getDouble("x"),
-                        rs.getDouble("y"),
-                        rs.getDouble("z")
-                );
-                double health = rs.getDouble("health");
-                double maxHealth = rs.getDouble("max_health");
-
-                Region region = new Region(id, owner, type, members, location, health, maxHealth);
-                regionMap.put(id, region);
+    private void indexRegion(Region r) {
+        Cuboid c = r.getCuboid();
+        for (int x = c.getPoint1().getBlockX() >> 4; x <= c.getPoint2().getBlockX() >> 4; x++) {
+            for (int z = c.getPoint1().getBlockZ() >> 4; z <= c.getPoint2().getBlockZ() >> 4; z++) {
+                long key = (((long)x) << 32) | (z & 0xffffffffL);
+                buckets.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet()).add(r);
             }
+        }
+        byId.put(r.getId(), r);
+    }
 
+    private void deindexRegion(Region r) {
+        Cuboid c = r.getCuboid();
+        for (int x = c.getPoint1().getBlockX() >> 4; x <= c.getPoint2().getBlockX() >> 4; x++) {
+            for (int z = c.getPoint1().getBlockZ() >> 4; z <= c.getPoint2().getBlockZ() >> 4; z++) {
+                long key = (((long)x) << 32) | (z & 0xffffffffL);
+                Set<Region> set = buckets.get(key);
+                if (set != null) set.remove(r);
+            }
+        }
+        byId.remove(r.getId());
+    }
+
+    @Override
+    public void save(Region r) {
+
+        try (Connection c = DriverManager.getConnection(dbUrl);
+             PreparedStatement ps = c.prepareStatement(
+                     "INSERT OR REPLACE INTO regions VALUES(?,?,?,?,?,?,?,?,?,?);")) {
+            ps.setString(1, r.getId());
+            ps.setString(2, r.getOwner());
+            ps.setString(3, r.getType().name());
+            ps.setString(4, String.join(";", r.getMembers()));
+            Location loc = r.getCuboid().getCenter();
+            ps.setString(5, loc.getWorld().getName());
+            ps.setDouble(6, loc.getX()); ps.setDouble(7, loc.getY()); ps.setDouble(8, loc.getZ());
+            ps.setDouble(9, r.getHealth()); ps.setDouble(10, r.getMaxHealth());
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        deindexRegion(r);
+        indexRegion(r);
+    }
+
+    @Override
+    public void delete(String id) {
+        Region r = byId.get(id);
+        if (r != null) {
+            deindexRegion(r);
+            try (Connection c = DriverManager.getConnection(dbUrl);
+                 PreparedStatement ps = c.prepareStatement("DELETE FROM regions WHERE id=?")) {
+                ps.setString(1, id);
+                ps.executeUpdate();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    @Override
+    public Region findById(String id) {
+        return byId.get(id);
+    }
+
+    @Override
+    public Collection<Region> findAll() {
+        return Collections.unmodifiableCollection(byId.values());
+    }
+
+    private void loadAll() {
+        try (Connection c = DriverManager.getConnection(dbUrl);
+             Statement s = c.createStatement();
+             ResultSet rs = s.executeQuery("SELECT * FROM regions;")) {
+            while (rs.next()) {
+                Location loc = new Location(
+                        Bukkit.getWorld(rs.getString("world")),
+                        rs.getDouble("x"), rs.getDouble("y"), rs.getDouble("z")
+                );
+                RegionType type = RegionType.valueOf(rs.getString("type"));
+                Cuboid cub = new Cuboid(loc, type.getRadius());
+                Region r = new Region(
+                        rs.getString("id"), rs.getString("owner"), type, cub, rs.getDouble("max_health")
+                );
+                r.damage(r.getMaxHealth() - rs.getDouble("health"));
+                indexRegion(r);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-    public Map<String, Region> getAllRegions() {
-        return regionMap;
+    public Set<Region> getBucket(long key) {
+        return buckets.getOrDefault(key, Collections.emptySet());
     }
 
-    public Region getRegionById(String id) {
-        return regionMap.get(id);
-    }
-
-    public String generateRegionId(String ownerName) {
-        int count = (int) regionMap.keySet().stream()
-                .filter(key -> key.endsWith("_" + ownerName))
-                .count();
-
-        return (count + 1) + "_" + ownerName;
-    }
 }

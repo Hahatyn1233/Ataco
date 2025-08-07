@@ -1,73 +1,56 @@
 package org.hahatyn.ataco.region;
 
-import org.bukkit.Location;
 import org.hahatyn.ataco.utils.Cuboid;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Region {
+    private final String id;
+    private final String owner;
+    private final RegionType type;
+    private final Set<String> members = ConcurrentHashMap.newKeySet();
+    private final Cuboid cuboid;
+    private volatile double health;
+    private final double maxHealth;
 
-    private String id;
-    private String ownerName;
-    private RegionType regionType;
-    private List<String> members;
-    private Location centerLocation;
-    private double heath;
-    private double maxHealth;
-
-    public Region(String id, String ownerName, RegionType regionType, List<String> members, Location centerLocation, double heath, double maxHealth) {
+    public Region(String id, String owner, RegionType type, Cuboid cuboid, double maxHealth) {
         this.id = id;
-        this.ownerName = ownerName;
-        this.regionType = regionType;
-        this.members = new ArrayList<>(members);
-        this.centerLocation = centerLocation;
-        this.heath = heath;
+        this.owner = owner;
+        this.type = type;
+        this.cuboid = cuboid;
+        this.health = maxHealth;
         this.maxHealth = maxHealth;
     }
 
-    public Cuboid getCuboid() {
-        return new Cuboid(centerLocation, regionType.getSize());
+    public String getId() { return id; }
+    public String getOwner() { return owner; }
+    public RegionType getType() { return type; }
+    public Cuboid getCuboid() { return cuboid; }
+    public double getHealth() { return health; }
+    public double getMaxHealth() { return maxHealth; }
+
+    public boolean addMember(String name) {
+        if (name.equalsIgnoreCase(owner) || members.contains(name)) return false;
+        return members.add(name);
     }
 
-    public String getId() {
-        return id;
+    public boolean removeMember(String name) {
+        return members.remove(name);
     }
 
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public RegionType getRegionType() {
-        return regionType;
-    }
-
-    public List<String> getMembers() {
+    public Set<String> getMembers() {
         return members;
     }
 
-    public Location getCenterLocation() {
-        return centerLocation;
+    public boolean isMember(String name) {
+        return name.equalsIgnoreCase(owner) || members.contains(name);
     }
 
-    public double getHeath() {
-        return heath;
+    public void damage(double amount) {
+        health = Math.max(0, health - amount);
     }
 
-    public double getMaxHealth() {
-        return maxHealth;
-    }
-    public boolean addMember(String playerName) {
-        if (playerName.equalsIgnoreCase(ownerName) || members.contains(playerName)) return false;
-        members.add(playerName);
-        return true;
-    }
-
-    public boolean removeMember(String playerName) {
-        return members.remove(playerName);
-    }
-
-    public boolean isMember(String playerName) {
-        return playerName.equalsIgnoreCase(ownerName) || members.contains(playerName);
+    public void heal(double amount) {
+        health = Math.min(maxHealth, health + amount);
     }
 }
