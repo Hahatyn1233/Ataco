@@ -11,15 +11,17 @@ public class RegionListener implements Listener {
 
     private final RegionManager regionManager;
 
-    public RegionListener(RegionManager mgr) { this.regionManager = mgr; }
+    public RegionListener(RegionManager regionManager) { this.regionManager = regionManager; }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        if (!regionManager.canInteract(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+        if (!regionManager.canInteract(e.getPlayer(), e.getBlock().getLocation()))
+            e.setCancelled(true);
     }
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        if (!regionManager.canInteract(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+        if (!regionManager.canInteract(e.getPlayer(), e.getBlock().getLocation()))
+            e.setCancelled(true);
     }
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {

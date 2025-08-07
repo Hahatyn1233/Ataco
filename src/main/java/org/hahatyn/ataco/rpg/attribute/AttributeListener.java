@@ -1,10 +1,6 @@
 package org.hahatyn.ataco.rpg.attribute;
 
 
-import org.bukkit.Bukkit;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,13 +11,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Map;
 import java.util.Random;
 
-public class AttributeEvent implements Listener {
+public class AttributeListener implements Listener {
 
     private final AttributeData attributeData;
     private final Random random = new Random();
     private final JavaPlugin plugin;
 
-    public AttributeEvent(JavaPlugin plugin, AttributeData attributeData) {
+    public AttributeListener(JavaPlugin plugin, AttributeData attributeData) {
         this.plugin = plugin;
         this.attributeData = attributeData;
     }

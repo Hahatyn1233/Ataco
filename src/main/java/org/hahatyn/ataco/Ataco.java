@@ -3,8 +3,7 @@ package org.hahatyn.ataco;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.hahatyn.ataco.rpg.attribute.AttributeData;
-import org.hahatyn.ataco.rpg.attribute.AttributeEvent;
-import org.hahatyn.ataco.rpg.attribute.AttributeUpdateTask;
+import org.hahatyn.ataco.rpg.attribute.AttributeListener;
 import org.hahatyn.ataco.rpg.classes.ClassesData;
 import org.hahatyn.ataco.rpg.items.CustomItemsUpdater;
 import org.hahatyn.ataco.worlds.GoMapCommand;
@@ -24,8 +23,7 @@ public final class Ataco extends JavaPlugin {
         new CustomItemsUpdater(this);
         this.classesData = new ClassesData();
         this.attributeData = new AttributeData();
-        new AttributeUpdateTask(this, attributeData).start();
-        Bukkit.getPluginManager().registerEvents(new AttributeEvent(this, attributeData), this);
+        Bukkit.getPluginManager().registerEvents(new AttributeListener(this, attributeData), this);
         getCommand("gomap").setExecutor(new GoMapCommand(new WorldManager()));
     }
 
