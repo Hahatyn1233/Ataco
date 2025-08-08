@@ -56,7 +56,7 @@ public class CustomItemsUpdater {
             public void run() {
                 Bukkit.getOnlinePlayers().forEach(player -> Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> checkInventory(player)));
             }
-        }.runTaskTimer(plugin, 20L, 20L); // каждую секунду
+        }.runTaskTimer(plugin, 20L, 20L);
     }
 
     private void checkInventory(Player player) {
@@ -67,11 +67,9 @@ public class CustomItemsUpdater {
             ItemStack item = contents[i];
             if (item == null || item.getType() == Material.AIR) continue;
 
-            // Пропустить, если уже есть lore
             ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.hasLore()) continue;
 
-            // Найти подходящий шаблон
             List<ItemTemplate> matchingTemplates = new ArrayList<>();
             for (ItemTemplate template : templates.values()) {
                 if (template.getMaterial() == item.getType()) {
@@ -81,10 +79,8 @@ public class CustomItemsUpdater {
 
             if (matchingTemplates.isEmpty()) continue;
 
-            // Выбрать с учётом шанса
             for (ItemTemplate template : matchingTemplates) {
                 if (random.nextInt(100) < template.getChance()) {
-                    // Заменить предмет
                     ItemStack newItem = createItem(template);
                     contents[i] = newItem;
                     changed = true;

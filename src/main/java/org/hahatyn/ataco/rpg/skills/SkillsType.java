@@ -4,7 +4,7 @@ import org.hahatyn.ataco.rpg.classes.ClassesType;
 
 public enum SkillsType {
 
-    SKILL1("Скилл1", "Мощный сука скилл", ClassesType.WARRIOR);
+    SKILL1("Скилл1", "скилл1", ClassesType.WARRIOR);
 
     private final String displayName;
     private final String description;
