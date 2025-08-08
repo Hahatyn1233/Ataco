@@ -15,18 +15,13 @@ public class Cuboid {
     private final double xMinCentered, xMaxCentered, yMinCentered, yMaxCentered, zMinCentered, zMaxCentered;
     private final World world;
 
-    // Кэшируем размеры
     private final int xWidth;
     private final int yHeight;
     private final int zWidth;
 
-    // Кэшируем центр (точные координаты)
     private final Location center;
-
-    // Один объект Random на весь класс
     private final Random random = new Random();
 
-    // Конструктор по двум точкам
     public Cuboid(final Location point1, final Location point2) {
         this.world = point1.getWorld();
 
@@ -54,7 +49,6 @@ public class Cuboid {
                 this.zMin + zWidth / 2.0);
     }
 
-    // Конструктор с центром и радиусом (радиус распространяется во все стороны)
     public Cuboid(final Location center, final int radius) {
         this.world = center.getWorld();
 
@@ -82,7 +76,6 @@ public class Cuboid {
                 this.zMin + zWidth / 2.0);
     }
 
-    // Ленивый итератор по блокам (не выделяет большой список)
     public Iterable<Block> blocks() {
         return () -> new Iterator<>() {
             private int x = xMin;
@@ -100,7 +93,6 @@ public class Cuboid {
 
                 Block block = world.getBlockAt(x, y, z);
 
-                // Инкрементируем координаты
                 if (++z > zMax) {
                     z = zMin;
                     if (++y > yMax) {
@@ -137,7 +129,6 @@ public class Cuboid {
         return new Location(world, xMax, yMax, zMax);
     }
 
-    // Используем общий Random
     public Location getRandomLocation() {
         int x = random.nextInt(xWidth) + xMin;
         int y = random.nextInt(yHeight) + yMin;
